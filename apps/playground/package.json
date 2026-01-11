@@ -17,10 +17,10 @@
     "@kay-ui/core": "workspace:*",
     "@kay-ui/tokens": "workspace:*",
     "@kay-ui/utils": "workspace:*",
-    "@mui/material": "^5.0.0",
-    "@mui/icons-material": "^5.0.0",
-    "@emotion/react": "^11.0.0",
-    "@emotion/styled": "^11.0.0"
+    "@mui/material": "^5.15.0",
+    "@mui/icons-material": "^5.15.0",
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",

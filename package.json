@@ -12,11 +12,6 @@
     "storybook": "turbo run storybook",
     "prepare": "husky install"
   },
-  "workspaces": [
-    "packages/*",
-    "apps/*",
-    "tooling/*"
-  ],
   "devDependencies": {
     "turbo": "^2.0.0",
     "typescript": "^5.0.0",

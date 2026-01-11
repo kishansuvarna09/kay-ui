@@ -23,8 +23,16 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
+      - name: Check if lock file exists
+        id: check-lockfile
+        run: test -f pnpm-lock.yaml && echo "exists=true" >> $GITHUB_OUTPUT || echo "exists=false" >> $GITHUB_OUTPUT
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          if [ "${{ steps.check-lockfile.outputs.exists }}" = "true" ]; then
+            pnpm install --frozen-lockfile
+          else
+            pnpm install
+          fi
       - name: Cache pnpm store
         uses: actions/cache@v3
         with:
@@ -194,7 +202,7 @@ jobs:
           path: artifacts
       - name: Get version from package.json
         id: version
-        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+        run: echo "VERSION=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
