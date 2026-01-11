@@ -1,0 +1,17 @@
+{
+  "name": "@kay-ui/docs",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Kay UI Documentation Site - Placeholder for TanStack Start",
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'TanStack Start docs coming soon...'",
+    "build": "echo 'Build script for docs'",
+    "preview": "echo 'Preview script for docs'"
+  },
+  "dependencies": {
+    "@kay-ui/core": "workspace:*",
+    "@kay-ui/tokens": "workspace:*",
+    "@kay-ui/utils": "workspace:*"
+  }
+}

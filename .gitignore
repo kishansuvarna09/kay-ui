@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+packages/*/dist/
+packages/*/build/
+apps/*/dist/
+apps/*/build/
+.storybook/
+storybook-static/
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+turbo.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS
+ds_store
+.Trashes
+*.localized
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+*.log
+*.tmp
+*.bak
+*.backup
+
+# Turbo cache
+.turbo/
+
+# Storybook
+.storybook/
+storybook-static/
+
+# Vite
+vite.config.ts.cache
+
+# TypeScript
+*.tsbuildinfo
+
+# Husky
+husky/

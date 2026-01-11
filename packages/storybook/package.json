@@ -1,0 +1,18 @@
+{
+  "name": "@kay-ui/storybook",
+  "version": "0.1.0",
+  "description": "Storybook configuration for Kay UI",
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "devDependencies": {
+    "@storybook/react": "^8.0.0",
+    "@storybook/react-vite": "^8.0.0",
+    "@storybook/addon-essentials": "^8.0.0",
+    "@storybook/addon-interactions": "^8.0.0",
+    "@storybook/addon-links": "^8.0.0",
+    "@storybook/testing-library": "^0.2.0",
+    "storybook": "^8.0.0"
+  }
+}

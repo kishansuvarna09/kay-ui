@@ -1,0 +1,158 @@
+name: PR Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+env:
+  PNPM_VERSION: 8
+  NODE_VERSION: 18
+
+jobs:
+  validate-pr:
+    name: Validate Pull Request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR title format
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+          subjectPattern: ^.+$
+          subjectPatternError: |
+            The subject should not be empty
+          validateSingleCommit: false
+
+  size-check:
+    name: Check PR Size
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR size
+        uses: codelytv/pr-size-labeler@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          xs_max_size: '10'
+          s_max_size: '100'
+          m_max_size: '500'
+          l_max_size: '1000'
+          fail_if_xs: 'false'
+          fail_if_s: 'false'
+          fail_if_m: 'false'
+          fail_if_l: 'false'
+          message_if_xs: '✅ PR size is XS (0-10 lines)'
+          message_if_s: '✅ PR size is S (10-100 lines)'
+          message_if_m: '✅ PR size is M (100-500 lines)'
+          message_if_l: '✅ PR size is L (500-1000 lines)'
+          message_if_xl: '⚠️ PR size is XL (>1000 lines). Consider breaking into smaller PRs.'
+
+  conventional-commits:
+    name: Check Commit Messages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate commit messages
+        uses: wagoid/commitlint-github-action@v5
+        with:
+          configFile: '.commitlintrc.js'
+
+  changed-files:
+    name: Detect Changed Files
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.changed.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed
+        uses: tj-actions/changed-files@v40
+        with:
+          files: |
+            packages/**
+          files_ignore: |
+            packages/**/dist
+            packages/**/node_modules
+            packages/**/*.md
+          since_last_remote_commit: true
+
+      - name: Determine affected packages
+        id: packages
+        run: |
+          # Extract package names from changed files
+          PACKAGES=$(echo "${{ steps.changed.outputs.all_changed_files }}" |
+            grep -oE 'packages/([^/]+)' |
+            cut -d'/' -f2 |
+            sort -u |
+            tr '\n' ' ')
+          echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
+          echo "Affected packages: $PACKAGES"
+
+  test-affected:
+    name: Test Affected Packages
+    needs: [changed-files, validate-pr, size-check, conventional-commits]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: ${{ fromJSON(needs.changed-files.outputs.packages) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Test affected package
+        run: cd packages/${{ matrix.package }} && pnpm test
+        if: matrix.package != ''
+
+  build-affected:
+    name: Build Affected Packages
+    needs: test-affected
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: ${{ fromJSON(needs.changed-files.outputs.packages) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build affected package
+        run: cd packages/${{ matrix.package }} && pnpm build
+        if: matrix.package != ''
